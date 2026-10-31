@@ -93,7 +93,7 @@ namespace PoissonRecon
 			if( sz>_MaxSize ) MK_THROW( "Resize size exceeds max size, considering increasing nesting: " , sz , " > " , _MaxSize );
 
 			// Quick check to see if anything needs doing
-			if( sz<_size ) return size();
+			if( sz<=_size ) return size();
 
 			// Otherwise lock it down and get to work
 			std::lock_guard lock( _mutex );
@@ -231,7 +231,14 @@ namespace PoissonRecon
 			size_t _sz = (sz+NestedVector< T , Depth-1 , LogSize >::_Mask)>>(LogSize*Depth);
 
 			// Quick check to see if anything needs doing
-			if( !_sz || _sz<_size ) return size();
+			if( !_sz ) return size();
+			{
+				// Without the lock: the entries are initialized before the sizes are
+				// published, so a large enough size means the entry can be used.
+				size_t currentSize = _size;
+				if( _sz<currentSize ) return size();
+				if( _sz==currentSize && _data[currentSize-1]->size()+NestedVector< T , Depth-1 , LogSize >::_MaxSize*(currentSize-1)>=sz ) return size();
+			}
 
 			// Otherwise lock it down and get to work
 			std::lock_guard lock( _mutex );

@@ -140,6 +140,23 @@ inline double get_item_value( const void * , int );
 
 /* get binary or ascii item and store it according to ptr and type */
 inline void get_ascii_item( const std::string & , int , int & , unsigned int & , long long & , unsigned long long & , double & );
+// Reads the bytes of one item. A PLY file is read by a single thread, so the
+// locking of fread (which costs more than the copy for items of 1 to 8 bytes) is skipped.
+static inline bool read_binary_bytes( FILE *fp , char *c , size_t size )
+{
+	for( size_t i=0 ; i<size ; i++ )
+	{
+#if defined( _WIN32 ) || defined( _WIN64 )
+		int ch = _getc_nolock( fp );
+#else // !_WIN32 && !_WIN64
+		int ch = getc_unlocked( fp );
+#endif // _WIN32 || _WIN64
+		if( ch==EOF ) return false;
+		c[i] = (char)ch;
+	}
+	return true;
+}
+
 inline void get_binary_item( FILE * , int       , int , int & , unsigned int & , long long & , unsigned long long & , double & );
 
 /* byte ordering */
@@ -1208,6 +1225,13 @@ void PlyFile::_binary_get_element( void *elem_ptr )
 				}
 			}
 		}
+		else if( file_type==native_binary_type && prop.external_type==prop.internal_type && store_it )
+		{
+			/* same representation in the file and in memory: copy the bytes */
+			item = (char *)elem_data + prop.offset;
+			if( !read_binary_bytes( fp , (char *)item , ply_type_size[prop.external_type] ) )
+				MK_THROW( "fread() failed -- aborting: " , std::string( type_names[prop.external_type] ) );
+		}
 		else                     /* not a list */
 		{
 			get_binary_item( fp , file_type , prop.external_type , int_val , uint_val , longlong_val , ulonglong_val , double_val );
@@ -1681,7 +1705,7 @@ void get_binary_item( FILE *fp , int file_type , int type , int &int_val , unsig
 	// integer conversion.
 	char c[8];
 
-	if( fread( c , ply_type_size[type] , 1 , fp )!=1 ) MK_THROW( "fread() failed -- aborting: " , std::string( type_names[type] ) );
+	if( !read_binary_bytes( fp , c , ply_type_size[type] ) ) MK_THROW( "fread() failed -- aborting: " , std::string( type_names[type] ) );
 	if( ( file_type!=native_binary_type ) && ( ply_type_size[type]>1 ) ) swap_bytes( c , ply_type_size[type] );
 
 	switch( type )
