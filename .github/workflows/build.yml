@@ -113,7 +113,13 @@ jobs:
         cmake --preset ${{ matrix.preset }} "${extra[@]}"
 
     - name: Build
-      run: cmake --build --preset ${{ matrix.preset }}
+      run: |
+        # Each tool is one heavily templated translation unit that needs
+        # a lot of memory to compile. The macOS runner has 3 cores but only
+        # 7 GB, so running a job per core makes it swap and take hours.
+        extra=()
+        if [ "$RUNNER_OS" = "macOS" ]; then extra+=(-j 2); fi
+        cmake --build --preset ${{ matrix.preset }} "${extra[@]}"
 
     # PoissonRecon prints its usage when started without arguments; a missing
     # library or a crash on startup would produce no such output.
