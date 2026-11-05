@@ -3055,7 +3055,7 @@ namespace PoissonRecon
 			{
 				PointAndDataType p;
 				p.template get<1>() = d;
-				for( unsigned int d=0 ; d<Dim ; d++ ) min[d] = std::numeric_limits< Real >::infinity() , max[d] = -std::numeric_limits< Real >::infinity();
+				for( unsigned int d=0 ; d<Dim ; d++ ) min[d] = (std::numeric_limits< Real >::max)() , max[d] = (std::numeric_limits< Real >::lowest)();
 				while( stream.read( p ) ) for( unsigned int d=0 ; d<Dim ; d++ ) min[d] = std::min< Real >( min[d] , p.template get<0>()[d] ) , max[d] = std::max< Real >( max[d] , p.template get<0>()[d] );
 				stream.reset();
 			}

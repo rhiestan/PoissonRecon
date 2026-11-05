@@ -289,7 +289,7 @@ void Partition::optimize( bool useMax , unsigned int padSize )
 	struct L2Energy
 	{
 		double e;
-		L2Energy( void ) : e( std::numeric_limits<double>::infinity() ) {}
+		L2Energy( void ) : e( (std::numeric_limits<double>::max)() ) {}
 		L2Energy( double e ) : e(e) {}
 		bool operator < ( const L2Energy &energy ) const { return e<energy.e; }
 	};

@@ -124,8 +124,8 @@ Frame< Real , Dim , ExtendedAxes >::Frame( void )
 template< typename Real , unsigned int Dim , bool ExtendedAxes >
 Extent< Real , Dim , ExtendedAxes >::Extent( void )
 {
-	Real inf = std::numeric_limits< Real >::infinity();
-	for( unsigned int d=0 ; d<DirectionN ; d++ ) extents[d].first = inf , extents[d].second = -inf;
+	// Not infinity(): the build uses -ffast-math (finite math only)
+	for( unsigned int d=0 ; d<DirectionN ; d++ ) extents[d].first = (std::numeric_limits< Real >::max)() , extents[d].second = (std::numeric_limits< Real >::lowest)();
 }
 
 template< typename Real , unsigned int Dim , bool ExtendedAxes >
