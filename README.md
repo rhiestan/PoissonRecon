@@ -1,3 +1,5 @@
+> **Fork with performance optimizations.** This is a fork of [mkazhdan/PoissonRecon](https://github.com/mkazhdan/PoissonRecon). It adds a CMake/vcpkg build with CI for Windows, Linux and macOS and performance optimizations; see [perfopt.md](perfopt.md) for what was done. The changes are on the `perfopt` branch (the default branch of this fork), `master` tracks the upstream repository.
+
 <center><h2>Adaptive Multigrid Solvers (Version 18.76)</h2></center>
 <center>
 <a href="#LINKS">links</a>
